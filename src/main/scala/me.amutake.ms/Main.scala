@@ -11,7 +11,7 @@ import scala.slick.driver.MySQLDriver.simple._
 
 object Main {
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
 
     val config = ConfigFactory.load()
 
@@ -25,10 +25,16 @@ object Main {
       password = password,
       driver = "com.mysql.jdbc.Driver"
     ).withSession { implicit session =>
-      Tables.unattendedPapers.ddl.create
-      Tables.papers.foreach { p =>
-        Tables.unattendedPapers += UnattendedPaper(0, p.id)
+      // Tables.unattendedPapers.ddl.create
+      val insertedLength: Int = Tables.unattendedPapers.length.run
+      println(insertedLength)
+      val allIds: Seq[Int] = Tables.papers.drop(insertedLength).map(_.id).run
+      println(allIds.take(10))
+      val willInsPapers = allIds.map { i =>
+        UnattendedPaper(0, i)
       }
+      println(willInsPapers.take(10))
+      Tables.unattendedPapers ++= willInsPapers
     }
   }
 }
